@@ -1,17 +1,14 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Listing = require("./models/listing.js");
-const Review = require("./models/review.js");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 const path = require("path");
-const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const { listingSchema, reviewSchema } = require("./schema.js");
 
 const listing = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
@@ -35,6 +32,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/listings", listing);
+app.use("/listings/:id/reviews", reviews);
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page not found"));
