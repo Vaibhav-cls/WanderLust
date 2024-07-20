@@ -27,21 +27,13 @@ async function main() {
   await mongoose.connect(MONGO_URL);
 }
 
-app.get("/", (req, res) => {
-  res.send("I am root");
-});
-
 app.use("/listings", listing);
 app.use("/listings/:id/reviews", reviews);
 
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page not found"));
 });
-app.use((err, req, res, next) => {
-  let { statusCode = 500, message = "something went wrong" } = err;
-  res.status(statusCode).render("error.ejs", { err });
-  //res.status(statusCode).send(message);
-});
+
 app.listen(8080, () => {
   console.log("server is listening to port 8080");
 });
