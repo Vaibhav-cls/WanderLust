@@ -44,8 +44,8 @@ router.post(
     failureFlash: true,
   }),
   async (req, res) => {
-    req.flash("success", "Welcome back to Wanderlust");
-    let redirectUrl = res.locals.redirectUrl || "/listings"
+    req.flash("success", `Welcome back, ${req.user.username} to Wanderlust`);
+    let redirectUrl = res.locals.redirectUrl || "/listings";
     res.redirect(redirectUrl);
   }
 );

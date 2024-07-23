@@ -23,6 +23,7 @@
         <a class="nav-link" href="/signup">Sign up</a>
         <a class="nav-link" href="/login">Log in</a>
         <% } %> <% if(currUser) {%>
+        <p><%= currUser.username %> |</p>
         <a class="nav-link" href="/logout">Log out</a>
         <% } %>
       </div>
