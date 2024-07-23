@@ -3,76 +3,26 @@ const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const Listing = require("../models/listing.js");
 const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
-
+const listingController = require("../controllers/listings.js");
 // INDEX ROUTE
 
-router.get(
-  "/",
-  wrapAsync(async (req, res, next) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs", { allListings });
-  })
-);
+router.get("/", wrapAsync(listingController.index));
 
 // NEW ROUTE
 
-router.get("/new", isLoggedIn, (req, res) => {
-  res.render("listings/new.ejs");
-});
+router.get("/new", isLoggedIn, listingController.renderNewForm);
 
 // SHOW ROUTE
 
 router.get(
   "/:id",
   // validateListing,
-  wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id)
-      .populate({
-        path: "reviews",
-        populate: {
-          path: "author",
-        },
-      })
-      .populate("owner");
-    if (!listing) {
-      req.flash("error", "Listing you requested for is deleted");
-      res.redirect("/listings");
-    }
-    res.render("listings/show.ejs", { listing });
-  })
+  wrapAsync(listingController.showListing)
 );
 
 // Create Route
 
-router.post(
-  "/",
-  isLoggedIn,
-  wrapAsync(async (req, res, next) => {
-    //let {title,description,price,image,country,location} = req.body;
-    //let listing = req.body.listing;
-    // if(!req.body.listing){
-    //     throw new ExpressError(400,"Send valid data for listing");
-    // }
-
-    const newListing = new Listing(req.body.listing);
-    newListing.owner = req.user._id;
-    await newListing.save();
-    req.flash("success", "New Listing Created!");
-    res.redirect("/listings");
-    // THIS IS ANOTHER WAY OF HANDLING THE SERVER SIDE ERROR
-
-    // if(!newListing.title){
-    //     throw new ExpressError(400,"Title is missing");
-    // }
-    // if(!newListing.description){
-    //     throw new ExpressError(400,"Description is missing");
-    // }
-    // if(!newListing.location){
-    //     throw new ExpressError(400,"Location is missing");
-    // }
-  })
-);
+router.post("/", isLoggedIn, wrapAsync(listingController.createListing));
 
 //  EDIT ROUTE
 
@@ -80,15 +30,7 @@ router.get(
   "/:id/edit",
   isLoggedIn,
   isOwner,
-  wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      req.flash("error", "Listing you requested for is deleted");
-      res.redirect("/listings");
-    }
-    res.render("listings/edit.ejs", { listing });
-  })
+  wrapAsync(listingController.editListing)
 );
 
 // UPDATE ROUTE
@@ -98,12 +40,7 @@ router.put(
   isLoggedIn,
   isOwner,
   validateListing,
-  wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    req.flash("success", "Listing Updated!");
-    res.redirect(`/listings/${id}`);
-  })
+  wrapAsync(listingController.updateListing)
 );
 
 //  DELETE ROUTE
@@ -112,12 +49,7 @@ router.delete(
   "/:id",
   isLoggedIn,
   isOwner,
-  wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    await Listing.findByIdAndDelete(id);
-    req.flash("success", "Listing Deleted!");
-    res.redirect("/listings");
-  })
+  wrapAsync(listingController.deleteListing)
 );
 
 // router.get("/testListing",async(req,res)=>{
