@@ -4,7 +4,7 @@ const wrapAsync = require("../utils/wrapAsync.js");
 const { listingSchema } = require("../schema.js");
 const ExpressError = require("../utils/ExpressError.js");
 const Listing = require("../models/listing.js");
-const path = require("path");
+const { isLoggedIn } = require("../middleware.js");
 
 const validateListing = (req, res, next) => {
   let { error } = listingSchema.validate(req.body);
@@ -28,11 +28,7 @@ router.get(
 
 // NEW ROUTE
 
-router.get("/new", (req, res) => {
-  if (!req.isAuthenticated()) {
-    req.flash("error", "You must be logged in to create listing");
-    res.redirect("/login");
-  }
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("listings/new.ejs");
 });
 
@@ -56,6 +52,7 @@ router.get(
 
 router.post(
   "/",
+  isLoggedIn,
   wrapAsync(async (req, res, next) => {
     //let {title,description,price,image,country,location} = req.body;
     //let listing = req.body.listing;
@@ -85,6 +82,7 @@ router.post(
 
 router.get(
   "/:id/edit",
+  isLoggedIn,
   wrapAsync(async (req, res, next) => {
     let { id } = req.params;
     const listing = await Listing.findById(id);
@@ -100,6 +98,7 @@ router.get(
 
 router.put(
   "/:id",
+  isLoggedIn,
   validateListing,
   wrapAsync(async (req, res, next) => {
     let { id } = req.params;
@@ -113,6 +112,7 @@ router.put(
 
 router.delete(
   "/:id",
+  isLoggedIn,
   wrapAsync(async (req, res, next) => {
     let { id } = req.params;
     await Listing.findByIdAndDelete(id);
