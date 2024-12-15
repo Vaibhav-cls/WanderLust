@@ -66,7 +66,11 @@ module.exports.editListing = async (req, res, next) => {
 
 module.exports.updateListing = async (req, res, next) => {
   let { id } = req.params;
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  if (typeof req.body.listing !== 'object' || req.body.listing === null) {
+    req.flash("error", "Invalid data for listing update");
+    return res.redirect(`/listings/${id}/edit`);
+  }
+  let listing = await Listing.findByIdAndUpdate(id, { $set: req.body.listing });
   if (typeof req.file != "undefined") {
     let url = req.file.path;
     let filename = req.file.filename;
